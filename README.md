@@ -94,7 +94,7 @@ Handles vector operations:
 - Embeds document chunks with task type `RETRIEVAL_DOCUMENT`
 - Embeds user queries with task type `RETRIEVAL_QUERY`
 - Uses cosine distance for semantic similarity search
-- Returns top-3 most relevant document chunks
+- Returns top-10 most relevant document chunks
 
 #### 5. **Database Layer** (`db/db_session.py`)
 Async SQLAlchemy engine with PostgreSQL:
@@ -194,7 +194,7 @@ Stores AI-generated analysis results:
 │ Body: {"query": "What is the main topic?"}                  │
 ├──────────────────────────────────────────────────────────────┤
 │ 1. Embed user query using Gemini embedding model            │
-│ 2. Find top-3 relevant document chunks (cosine distance)    │
+│ 2. Find top-10 relevant document chunks (cosine distance)    │
 │ 3. Construct refined prompt with context                    │
 │ 4. Store user message in ChatMessage table                  │
 └──────────────────────────────────────────────────────────────┘
@@ -291,7 +291,7 @@ Body: {"query": "What are the main findings?"}
 **Step 2: Semantic retrieval**
 - Query embedded using same Gemini model (task: `RETRIEVAL_QUERY`)
 - Cosine distance calculated: `||query_embedding - chunk_embedding||²`
-- Top-3 chunks returned (highest similarity)
+- Top-10 chunks returned (highest similarity)
 - Context assembled from retrieved chunks
 
 **Step 3: Prompt engineering**
@@ -300,7 +300,7 @@ Final Prompt:
 "Using the provided context, perform a deep-dive analysis.
 
 Context:
-[Top 3 chunk contents joined]
+[Top 10 chunk contents joined]
 
 User Query: {user_query}"
 ```
@@ -400,7 +400,7 @@ class DocumentAnalysis(BaseModel):
                  │                                               │
                  ▼                                               ▼
       ┌──────────────────────────┐                      ┌──────────────────┐
-      │  Extract Text (PDF/TXT)  │                      │ Top-3 Chunks     │
+      │  Extract Text (PDF/TXT)  │                      │ Top-10 Chunks     │
       └────────────┬─────────────┘                      │ (Most Similar)   │
                    │                                    └────────┬─────────┘
          Split into 500-char chunks                             │
